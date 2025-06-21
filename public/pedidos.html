@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="imagen/png" href="IMG2.png">
+     <link rel="stylesheet" href="css/pedidos.css">
+    <title>Pedidos</title>
+</head>
+<body>
+    
+    <!--menu de navegacion-->
+    <div class="menu">
+        <a href="principal.html"> Menu principal</a>
+        <a href="empleados.html"> Empleados</a>
+        <a href="clientes.html"> Clientes</a>
+        <a href="menu.html"> Menu</a>
+        <a href="reservaciones.html"> Reservaciones</a>
+        <a href="index.html"> Cerrar sesion</a>
+    </div>
+
+    <h2>Lista de pedidos</h2>
+
+    <div class="agregar-pedido-container">
+        <h3>Agregar pedido</h3>
+        <form id="formPedido" class="form-horizontal">
+            <input type="text" id="cliente" placeholder="Cliente" required>
+            <input type="text" id="producto" placeholder="Producto" required>
+            <button type="submit">Agregar</button>
+        </form>
+    </div>
+    <!--tabla de pedidos agregados-->
+
+    <div class="tabla-container">
+        <table id="tablaPedidos">
+<thead>
+    <tr>
+        <th>Cliente</th>
+        <th>Producto</th>
+        <th>Acciones</th>
+    </tr>
+</thead>
+<tbody>
+
+</tbody>
+        </table>
+    </div>
+
+    <script>
+        //funcion para cargar y mostrar pedidos
+        async function CargarPedidos(){
+            const res = await fetch('/api/Pedidos');
+            const pedidos = await res.json();
+            const tbody = document.querySelector('#tablaPedidos tbody');
+            tbody.innerHTML = pedidos.map(p =>  `
+           <tr> 
+            <td>${p.cliente}</td>
+            <td>${p.producto}</td>
+            <td>
+                <button class="btn-eliminar"
+                onclick = "eliminarPedido('${p._id}')"> Eliminar
+                </button>
+                </td>
+            </tr> 
+        `).join('');
+        }
+
+         // Función para eliminar un pedido por su ID, preguntando antes al usuario
+        async function eliminarPedido(id) {
+            const confirmar = confirm('¿Estás seguro de que deseas eliminar este pedido?');
+            if (!confirmar) return;
+            await fetch(`/api/Pedidos/${id}`, { method: 'DELETE' });
+            CargarPedidos();
+        }
+
+        //MANEJAR EL EVENTO SUBMIT
+        document.getElementById('formPedido').addEventListener('submit', async(e) => {
+        e.preventDefault();
+        const cliente = document.getElementById('cliente').value;
+        const producto = document.getElementById('producto').value;
+
+
+        await fetch ('/api/Pedidos',{
+            
+       
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({cliente,producto})
+        });
+        document.getElementById('formPedido').reset();
+        CargarPedidos();
+    });
+
+        // Llama a la función para cargar los pedidos al cargar la página
+        CargarPedidos();
+
+        // Hace la función eliminarPedidos accesible globalmente
+        window.eliminarPedido = eliminarPedido;
+           
+    </script>
+</body>
+</html>

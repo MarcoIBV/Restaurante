@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="imagen/png" href="IMG2.png">
+     <link rel="stylesheet" href="css/clientes.css">
+    <title>Clientes</title>
+</head>
+<body>
+    
+    <!--menu de navegacion-->
+    <div class="menu">
+        <a href="principal.html"> Menu principal</a>
+        <a href="empleados.html"> Empleados</a>
+        <a href="pedidos.html"> Pedidos</a>
+        <a href="menu.html"> Menu</a>
+        <a href="reservaciones.html"> Reservaciones</a>
+        <a href="index.html"> Cerrar sesion</a>
+    </div>
+
+    <h2>Lista de Clientes</h2>
+
+    <div class="agregar-cliente-container">
+        <h3>Agregar Cliente</h3>
+        <form id="formcliente" class="form-horizontal">
+            <input type="text" id="Nombre" placeholder="Nombre_cliente" required>
+            <input type="text" id="Apellido" placeholder="Apellido" required>
+            <button type="submit">Agregar</button>
+        </form>
+    </div>
+    <!--tabla de clientes agregados-->
+
+    <div class="tabla-container">
+        <table id="tablaCliente">
+<thead>
+    <tr>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>Acciones</th>
+    </tr>
+</thead>
+<tbody>
+
+</tbody>
+        </table>
+    </div>
+
+    <script>
+        //funcion para cargar y mostrar clientes
+        async function CargarClientes(){
+            const res = await fetch('/api/Clientes');
+            const Clientes = await res.json();
+            const tbody = document.querySelector('#tablaCliente tbody');
+            tbody.innerHTML = Clientes.map(p =>  `
+           <tr> 
+            <td>${p.Nombre}</td>
+            <td>${p.Apellido}</td>
+            <td>
+                <button class="btn-eliminar"
+                onclick = "eliminarCliente('${p._id}')"> Eliminar
+                </button>
+                </td>
+            </tr> 
+        `).join('');
+        }
+
+         // Función para eliminar un cliente por su ID, preguntando antes al usuario
+        async function eliminarCliente(id) {
+            const confirmar = confirm('¿Estás seguro de que deseas eliminar a este cliente?');
+            if (!confirmar) return;
+           await fetch(`/api/Clientes/${id}`, { method: 'DELETE' });
+            CargarClientes();
+        }
+
+        //MANEJAR EL EVENTO SUBMIT
+        document.getElementById('formcliente').addEventListener('submit', async(e) => {
+        e.preventDefault();
+        const Nombre = document.getElementById('Nombre').value;
+        const Apellido = document.getElementById('Apellido').value;
+
+
+        await fetch ('/api/Clientes',{
+            
+       
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({Nombre, Apellido})
+        });
+        document.getElementById('formcliente').reset();
+        CargarClientes();
+    });
+
+        // Llama a la función para cargar los cliente al cargar la página
+        CargarClientes();
+
+        // Hace la función eliminarClientes accesible globalmente
+        window.eliminarCliente = eliminarCliente;
+           
+    </script>
+</body>
+</html>

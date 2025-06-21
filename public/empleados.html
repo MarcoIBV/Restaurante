@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="imagen/png" href="IMG2.png">
+     <link rel="stylesheet" href="css/empleados.css">
+    <title>empleados</title>
+</head>
+<body>
+    
+    <!--menu de navegacion-->
+    <div class="menu">
+        <a href="principal.html"> Menu principal</a>
+        <a href="clientes.html"> Clientes</a>
+        <a href="pedidos.html"> Pedidos</a>
+        <a href="menu.html"> Menu</a>
+        <a href="reservaciones.html"> Reservaciones</a>
+        <a href="index.html"> Cerrar sesion</a>
+    </div>
+
+    <h2>Lista de Empleados</h2>
+
+    <div class="agregar-empleado-container">
+        <h3>Agregar empleado</h3>
+        <form id="formEmpleado" class="form-horizontal">
+            <input type="text" id="nombre" placeholder="Nombre_empleado" required>
+            <input type="text" id="rol" placeholder="Rol" required>
+            <button type="submit">Agregar</button>
+        </form>
+    </div>
+    <!--tabla de empleados agregados-->
+
+    <div class="tabla-container">
+        <table id="tablaempleado">
+<thead>
+    <tr>
+        <th>Nombre</th>
+        <th>Rol</th>
+        <th>Acciones</th>
+    </tr>
+</thead>
+<tbody>
+
+</tbody>
+        </table>
+    </div>
+
+    <script>
+        //funcion para cargar y mostrar empleados
+        async function CargarEmpleado(){
+            const res = await fetch('/api/Empleados');
+            const empleado = await res.json();
+            const tbody = document.querySelector('#tablaempleado tbody');
+            tbody.innerHTML = empleado.map(p =>  `
+           <tr> 
+            <td>${p.nombre}</td>
+            <td>${p.rol}</td>
+            <td>
+                <button class="btn-eliminar"
+                onclick = "eliminarEmpleado('${p._id}')"> Eliminar
+                </button>
+                </td>
+            </tr> 
+        `).join('');
+        }
+
+         // Función para eliminar un empleado por su ID, preguntando antes al usuario
+        async function eliminarEmpleado(id) {
+            const confirmar = confirm('¿Estás seguro de que deseas eliminar este empleado?');
+            if (!confirmar) return;
+            await fetch(`/api/Empleados/${id}`, { method: 'DELETE' });
+            CargarEmpleado();
+        }
+
+        //MANEJAR EL EVENTO SUBMIT
+        document.getElementById('formEmpleado').addEventListener('submit', async(e) => {
+        e.preventDefault();
+        const nombre = document.getElementById('nombre').value;
+        const rol = document.getElementById('rol').value;
+
+
+        await fetch ('/api/Empleados',{
+            
+       
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({nombre, rol})
+        });
+        document.getElementById('formEmpleado').reset();
+        CargarEmpleado();
+    });
+
+        // Llama a la función para cargar los empleados al cargar la página
+        CargarEmpleado();
+
+        // Hace la función eliminarEmpleados accesible globalmente
+        window.eliminarEmpleado = eliminarEmpleado;
+           
+    </script>
+</body>
+</html>

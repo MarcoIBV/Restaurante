@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="imagen/png" href="IMG2.png">
+     <link rel="stylesheet" href="css/menu.css">
+    <title>Menu</title>
+</head>
+<body>
+    
+    <!--menu de navegacion-->
+    <div class="menu">
+        <a href="principal.html"> Menu principal</a>
+        <a href="empleados.html"> Empleados</a>
+        <a href="clientes.html"> Clientes</a>
+        <a href="pedidos.html"> Pedidos</a>
+        <a href="teservaciones.html"> Reservaciones</a>
+        <a href="index.html"> Cerrar sesion</a>
+    </div>
+
+    <h2>Lista de Menu</h2>
+
+    <div class="agregar-menu-container">
+        <h3>Agregar Platillo</h3>
+        <form id="formMenu" class="form-horizontal">
+            <input type="text" id="nombre" placeholder="Nombre_platillo" required>
+            <input type="number" id="precio" placeholder="Precio" required>
+            <button type="submit">Agregar</button>
+        </form>
+    </div>
+    <!--tabla de menu agregados-->
+
+    <div class="tabla-container">
+        <table id="tablaMenu">
+<thead>
+    <tr>
+        <th>Nombre</th>
+        <th>Precio</th>
+        <th>Acciones</th>
+    </tr>
+</thead>
+<tbody>
+
+</tbody>
+        </table>
+    </div>
+
+    <script>
+        //funcion para cargar y mostrar el menu
+        async function CargarMenu(){
+            const res = await fetch('/api/Menu');
+            const menu = await res.json();
+            const tbody = document.querySelector('#tablaMenu tbody');
+            tbody.innerHTML = menu.map(p =>  `
+           <tr> 
+            <td>${p.nombre}</td>
+            <td>${p.precio}</td>
+            <td>
+                <button class="btn-eliminar"
+                onclick = "eliminarMenu('${p._id}')"> Eliminar
+                </button>
+                </td>
+            </tr> 
+        `).join('');
+        }
+
+         // Función para eliminar un platillo por su ID, preguntando antes al usuario
+        async function eliminarMenu(id) {
+            const confirmar = confirm('¿Estás seguro de que deseas eliminar este platillo?');
+            if (!confirmar) return;
+            await fetch(`/api/Menu/${id}`, { method: 'DELETE' });
+            CargarMenu();
+        }
+
+        //MANEJAR EL EVENTO SUBMIT
+        document.getElementById('formMenu').addEventListener('submit', async(e) => {
+        e.preventDefault();
+        const nombre = document.getElementById('nombre').value;
+        const precio = document.getElementById('precio').value;
+
+
+        await fetch ('/api/Menu',{
+            
+       
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({nombre, precio})
+        });
+        document.getElementById('formMenu').reset();
+        CargarMenu();
+    });
+
+        // Llama a la función para cargar los platillos al cargar la página
+        CargarMenu();
+
+        // Hace la función eliminarMenu accesible globalmente
+        window.eliminarMenu = eliminarMenu;
+           
+    </script>
+</body>
+</html>
