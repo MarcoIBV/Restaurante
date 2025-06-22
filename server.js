@@ -10,7 +10,8 @@ const { parseURL } = require('whatwg-url');
 //crear una instancia de la aplicacion express
 const app=express();
 //definir el puerto donde se ejcutaara el server
-const PORT=3000;
+const PORT = process.env.PORT || 3000; // USA EL PUERTO QUE ASIGNE RAILWAY O LOCAL 3000
+
 
 //habilitar cors par permitir peticiones
 app.use(cors());
@@ -23,15 +24,12 @@ app.use(express.static('public'));
 //conexion mongoDB
 
 //conectarse a restaurante
-mongoose.connect('mongodb://localhost:27017/restaurante',{
-useNewUrlParser:true,//usar el parser de url
-useUnifiedTopology: true //motor de monitoreo  
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
 })
-
-//si la conexion es exitosa, muestra mensaje
-.then(() =>console.log('conectado a mongo'))
-//si hay un error, que muestre un mensaje
-.catch (err=>console.error(err));
+.then(() => console.log('CONECTADO A MONGODB ATLAS'))
+.catch(err => console.error('ERROR DE CONEXIÓN:', err));
 
 //Define el esquema para los usurios
 const UsuarioSchema= new mongoose.Schema({
